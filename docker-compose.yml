@@ -1,5 +1,6 @@
 version: '3.8'
 
+
 services:
   ollama:
     build:
@@ -8,9 +9,19 @@ services:
     ports:
       - "11434:11434"
     volumes:
-      - ./data/chroma:/data/chroma
+      - ./data/ollama:/root/ollama
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
     networks:
       - rag_network
+
 
   chromadb:
     build:
