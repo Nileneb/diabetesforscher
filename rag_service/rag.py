@@ -8,7 +8,7 @@ from langchain_community.embeddings.sentence_transformer import SentenceTransfor
 from langchain_huggingface import HuggingFaceEmbeddings
 
 
-folder_path = os.path.expanduser("~/.ollama/data/")
+folder_path = os.path.expanduser("./ollama/data/")
 
 
 pdf_files = [f for f in os.listdir(folder_path) if f.endswith('.pdf')]
