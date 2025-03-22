@@ -1,6 +1,8 @@
-# Dockerfile für ChromaDB Container
-FROM python:3.9-slim
+# Dockerfile für chromadb Service
 
-RUN pip install --no-cache-dir chromadb
+FROM chromadb/chroma:latest
 
-CMD ["chromadb", "serve", "--host", "0.0.0.0", "--port", "8000"]
+# Optional: Füge benutzerdefinierte Konfigurationen oder Abhängigkeiten hinzu
+# COPY custom_config.yml /path/to/config/
+
+CMD ["chromadb-server"]

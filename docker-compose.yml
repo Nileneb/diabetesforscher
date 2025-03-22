@@ -1,69 +1,45 @@
-version: '3.8'
-
 services:
-  ollama:
+  app:
     build:
-      context: ./ollama
-    container_name: ollama
-    ports:
-      - "11434:11434"
-    volumes:
-      - ollama_data:/root/.ollama
-    networks:
-      - rag_network
-
-  chromadb:
-    build:
-      context: ./chromadb
-    container_name: chromadb
+      context: .
+    container_name: diabetesforscher-app
     ports:
       - "8000:8000"
-    environment:
-      ALLOW_RESET: "TRUE"
-    depends_on:
-      - ollama
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    volumes:
-      - chroma_data:/data
-    networks:
-      - rag_network
-
-  rag_service:
-    build:
-      context: ./rag_service
-    container_name: rag_service
-    depends_on:
-      chromadb:
-        condition: service_healthy
-    environment:
-      ALLOW_RESET: "TRUE"
-    command: python ./rag_query.py
-    ports:
       - "5000:5000"
-    networks:
-      - rag_network
-
-  datafetcher:
-    build:
-      context: ./datafetcher
-    container_name: datafetcher
-    depends_on:
-      chromadb:
-        condition: service_healthy
+      - "11434:11434"
     volumes:
-      - data:/mnt/data
+      - chroma_data:/chroma/chroma
+      - ollama_data:/root/.ollama
+      - ./server.htpasswd:/chroma/server.htpasswd
+    environment:
+      - IS_PERSISTENT=TRUE
+      - CHROMA_SERVER_AUTHN_PROVIDER=${CHROMA_SERVER_AUTHN_PROVIDER}
+      - CHROMA_SERVER_AUTHN_CREDENTIALS_FILE=/chroma/server.htpasswd
+      - CHROMA_SERVER_AUTHN_CREDENTIALS=${CHROMA_SERVER_AUTHN_CREDENTIALS}
+      - CHROMA_AUTH_TOKEN_TRANSPORT_HEADER=${CHROMA_AUTH_TOKEN_TRANSPORT_HEADER}
+      - PERSIST_DIRECTORY=${PERSIST_DIRECTORY:-/chroma/chroma}
+      - CHROMA_OTEL_EXPORTER_ENDPOINT=${CHROMA_OTEL_EXPORTER_ENDPOINT}
+      - CHROMA_OTEL_EXPORTER_HEADERS=${CHROMA_OTEL_EXPORTER_HEADERS}
+      - CHROMA_OTEL_SERVICE_NAME=${CHROMA_OTEL_SERVICE_NAME}
+      - CHROMA_OTEL_GRANULARITY=${CHROMA_OTEL_GRANULARITY}
+      - CHROMA_SERVER_NOFILE=${CHROMA_SERVER_NOFILE}
+    env_file:
+      - .env
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8000/api/v2/heartbeat" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
     networks:
-      - rag_network
+      - net
 
 volumes:
   ollama_data:
+    driver: local
   chroma_data:
-  data:
+    driver: local
 
 networks:
-  rag_network:
+  net:
     driver: bridge

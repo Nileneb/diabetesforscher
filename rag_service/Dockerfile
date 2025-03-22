@@ -11,6 +11,8 @@ RUN pip install --no-cache-dir \
     langchain_community \
     langchain_text_splitters \
     sentence-transformers \
+    llama-index-embeddings-ollama \
+    llama-index \
     openai \
     flask \
     pypdf
@@ -19,4 +21,4 @@ WORKDIR /usr/src/app
 
 COPY . .
 
-CMD ["python", "rag_query.py"]
+CMD ["python", "rag.py"]

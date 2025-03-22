@@ -5,8 +5,9 @@ from langchain_community.embeddings.sentence_transformer import SentenceTransfor
 from langchain_huggingface import HuggingFaceEmbeddings
 
 
+# This function retrieves similar documents from the database for a given query.
 def Extract_context(query):
-    chroma_client = chromadb.HttpClient(host='host.docker.internal', port=8000, settings=Settings(allow_reset=True))
+    chroma_client = chromadb.HttpClient(host='host.docker.internal', port=8000, settings=Settings(allow_reset=False))
     embedding_function = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2")
     db = Chroma(
         client=chroma_client,
@@ -20,6 +21,7 @@ def Extract_context(query):
 
     return fullcontent
 
+# This function generates a "system" prompt for the language model.
 def get_system_message_rag(content):
     return f"""You are an expert consultant helping executive advisors to get relevant information from internal documents.
 
@@ -43,6 +45,7 @@ def get_system_message_rag(content):
     {content}
     """
 
+# This function generates a "user" prompt for the language model.
 def get_ques_response_prompt(question):
     return f"""
     ==============================================================
@@ -52,6 +55,7 @@ def get_ques_response_prompt(question):
 
 from ollama import Client
 
+# This function retrieves context and returns a response string from the model.
 def generate_rag_response(content, question):
     client = Client(host='http://host.docker.internal:11434')
     stream = client.chat(model='mistral', messages=[

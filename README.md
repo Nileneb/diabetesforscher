@@ -1,2 +1,3 @@
 # diabetesforscher
- A llama, a RAG, fetching for diabetes data
+
+A LLaMA-based RAG system fetching and processing diabetes-related data.

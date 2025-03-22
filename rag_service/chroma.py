@@ -1,14 +1,16 @@
-# create the chroma client
 import uuid
 import chromadb
 from chromadb.config import Settings
 
-settings = Settings(allow_reset=True
+settings = Settings(allow_reset=False)
 client = chromadb.HttpClient(host='host.docker.internal', port=8000, settings=settings)
-collection = client.create_collection("my_collection")
+collection = client.get_or_create_collection("my_collection")
+
 for doc in docs:
     collection.add(
-        ids=[str(uuid.uuid1())], metadatas=doc.metadata, documents=doc.page_content
+        ids=[str(uuid.uuid4())],  # Verwende uuid4 für bessere Sicherheit
+        metadatas=[doc["metadata"]],
+        documents=[doc["page_content"]]
     )
 
 # tell LangChain to use our client and collection name
